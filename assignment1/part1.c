@@ -27,7 +27,8 @@ void main(int argc, char **argv)
     }
 
     for(i=0; i<N; i++)
-    {
+    {  
+        
         pid_t wpid = wait(&child_status) ;
         if(WIFEXITED(child_status))
             printf("Child %d terminated with exit status %d \n", wpid, WEXITSTATUS(child_status));
