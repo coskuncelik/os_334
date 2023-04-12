@@ -2,6 +2,10 @@
 #include "part1.h"
 #include "sort.h"
 
+void signal_handler(int sig);
+
+int sig_received = 999 ;
+struct timeval  sig_rec_time;
 
 void main(int argc, char **argv)
 {
@@ -10,6 +14,9 @@ void main(int argc, char **argv)
 
     pid_t pid[file_count] ;
     int i, child_status;
+
+    signal(SIGUSR1, signal_handler);
+    signal(SIGUSR2, signal_handler);
 
     for(i=0; i<file_count; i++)
     {
@@ -21,8 +28,16 @@ void main(int argc, char **argv)
     }
 
     for(i=0; i<file_count; i++)
-    {  
+    {
+        if(i%2 == 0)
+            kill(pid[i], SIGUSR1);
+        else
+            kill(pid[i], SIGUSR2);
+        sleep(1);
+    }
 
+    for(i=0; i<file_count; i++)
+    {  
         pid_t wpid = wait(&child_status) ;
         if(WIFEXITED(child_status))
             printf("Child %d terminated with exit status %d \n", wpid, WEXITSTATUS(child_status));
@@ -33,6 +48,14 @@ void main(int argc, char **argv)
     
 }
 
+void signal_handler(int sig) {
+    
+    printf("signal: %d \n", sig);
+    sig_received = sig;
+
+    gettimeofday(&sig_rec_time, NULL);
+
+}
 
 int childFunction(int no)
 {
@@ -107,7 +130,8 @@ int childFunction(int no)
         fprintf(OutputFile, "%d ", nums[i]);
     fprintf(OutputFile, "\n");
     fprintf(OutputFile, "%f \n", time_spent);
-    fprintf(OutputFile, "**** coming soon (for signal implementation) ****\n");
+    fprintf(OutputFile, "sig: %d  receive time: %f\n", sig_received, sig_rec_time.tv_sec + (double)sig_rec_time.tv_usec/1000000 );
+    //fprintf(OutputFile, "**** coming soon (for signal implementation) ****\n");
 
 
     // Close files
