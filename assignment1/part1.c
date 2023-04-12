@@ -1,14 +1,8 @@
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <time.h>
-#include <sys/time.h>
-#include <sys/wait.h>
+#include "part1.h"
 #include "sort.h"
 
-int childFunction(int n);
-int parentFunction();
+
 
 #if 1
 #define N 5 
@@ -36,7 +30,7 @@ void main(int argc, char **argv)
         else
             printf("Child %d terminated abnormally\n", wpid);
     }
-    parentFunction();
+    parentFunction(N);
     
 }
 #endif
@@ -122,8 +116,67 @@ int childFunction(int no)
     return 0;
 }
 
-int parentFunction() {
+
+int parentFunction(int no) {
     printf("parent function started\n");
+
+    output_t outs[N];
+
+    int i, j, n;
+    char InputFileName[64], OutputFileName[64], FinalOutputFileName[64];
+    int nums[100];
+    float exec_time;
+
+    for(i=0; i<no; i++)
+    {
+        sprintf(OutputFileName, "file/output%d.txt", i);
+            
+        FILE *OutputFile = fopen(OutputFileName, "r");
+        if (OutputFile == NULL){
+            printf("Cannot open output file %d \n", no);
+            return 1;
+        }
+
+        fscanf(OutputFile,"%d\n", &outs[i].count);
+
+        for(j=0; j<outs[i].count; j++)
+            fscanf(OutputFile,"%d ", &outs[i].nums[j]);
+
+        fscanf(OutputFile,"%f\n",&outs[i].exec_time);
+    }
+    
+    SelectionSortForOuts(outs, N);
+
+#if 0
+    for(i=0; i<no; i++)
+    {
+        printf("%d\n",outs[i].count);
+        for(j=0; j<outs[i].count; j++)
+            printf("%d ", outs[i].nums[j]);
+        printf("\n");
+        printf("%f\n\n\n",outs[i].exec_time);
+    }
+#endif
+
+    sprintf(FinalOutputFileName, "file/output.txt");
+    FILE *FinalOutputFile = fopen(FinalOutputFileName, "w");
+    if (FinalOutputFile == NULL){
+        printf("Cannot open Final output file \n");
+        return 1;
+    }
+
+    for(i=0; i<no; i++)
+    {
+        fprintf(FinalOutputFile, "%f - ", outs[i].exec_time);
+        for(j=0; j<outs[i].count; j++)
+            fprintf(FinalOutputFile, "%d ", outs[i].nums[j]);
+        fprintf(FinalOutputFile, " - ");
+        fprintf(FinalOutputFile, "SIG?? \n");
+    }
+
+
+    printf("parent function finished\n");
+    return 0;
 }
 
 

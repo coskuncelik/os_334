@@ -1,4 +1,5 @@
 
+#include "part1.h"
 
 void SelectionSort(int * nums, int n)
 {
@@ -34,4 +35,25 @@ void InsertionSort(int * nums, int n)
         nums[j + 1] = key;
   }
 
+}
+
+
+void SelectionSortForOuts(output_t * outs, int n)
+{
+    int i,k;
+    output_t tmp;
+
+    k=0;
+    for(k=0; k<(n-1); k++)
+    {
+        for(i=k+1; i<n; i++){
+            if(outs[i].exec_time < outs[k].exec_time)
+            {
+                tmp = outs[k] ;
+                outs[k] = outs[i];
+                outs[i] = tmp ;
+            } 
+        }
+    }
+    return;
 }
