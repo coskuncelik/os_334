@@ -7,7 +7,8 @@
 #include <sys/wait.h>
 #include "sort.h"
 
-int function(int n);
+int childFunction(int n);
+int parentFunction();
 
 #if 1
 #define N 5 
@@ -21,25 +22,26 @@ void main(int argc, char **argv)
     {
         if( (pid[i] = fork()) == 0  )
         {
-            function(i);
+            childFunction(i);
             exit(100+i);
         }
     }
 
     for(i=0; i<N; i++)
     {  
-        
+
         pid_t wpid = wait(&child_status) ;
         if(WIFEXITED(child_status))
             printf("Child %d terminated with exit status %d \n", wpid, WEXITSTATUS(child_status));
         else
             printf("Child %d terminated abnormally\n", wpid);
     }
+    parentFunction();
     
 }
 #endif
 
-int function(int no)
+int childFunction(int no)
 {
     // Definitions
     char InputFileName[64], OutputFileName[64];
@@ -110,7 +112,7 @@ int function(int no)
         fprintf(OutputFile, "%d ", nums[i]);
     fprintf(OutputFile, "\n");
     fprintf(OutputFile, "%f \n", time_spent);
-    fprintf(OutputFile, "**** coming soon ****\n");
+    fprintf(OutputFile, "**** coming soon (for signal implementation) ****\n");
 
 
     // Close files
@@ -119,4 +121,9 @@ int function(int no)
     
     return 0;
 }
+
+int parentFunction() {
+    printf("parent function started\n");
+}
+
 
