@@ -15,6 +15,8 @@ typedef struct {
     int nums[100];
     float exec_time;
     int sig;
+    char signal[64];
+    char sig_rec[64];
 } output_t ;
 
 

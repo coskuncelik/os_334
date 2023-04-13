@@ -51,12 +51,8 @@ void main(int argc, char **argv)
 }
 
 void signal_handler(int sig) {
-    
-    printf("signal: %d \n", sig);
     sig_received = sig;
-
     gettimeofday(&sig_rec_time, NULL);
-
 }
 
 int childFunction(int no)
@@ -95,7 +91,6 @@ int childFunction(int no)
         fscanf(InputFile,"%d ", &nums[i]);
 
     // Sort numbers with appropriate sorting function
-    printf("getpid:%d \n", getpid());
     if( (getpid()%2) == 1)
         SelectionSort(nums, m);
     else
@@ -123,7 +118,7 @@ int childFunction(int no)
     gettimeofday(&tv2, NULL);
     double time_spent = (double) (tv2.tv_usec - tv1.tv_usec) / 1000000 + (double) (tv2.tv_sec - tv1.tv_sec) ;
 
-#if 1
+#if 0
     printf ("Total time = %f seconds\n", time_spent);
 #endif
 
@@ -133,9 +128,7 @@ int childFunction(int no)
         fprintf(OutputFile, "%d ", nums[i]);
     fprintf(OutputFile, "\n");
     fprintf(OutputFile, "%f \n", time_spent);
-    fprintf(OutputFile, "%s %f\n",  ( (sig_received==10)?("SIGUSR1"):("SIGUSR2") ) , sig_rec_time.tv_sec + (double)sig_rec_time.tv_usec/1000000 );
-    //fprintf(OutputFile, "**** coming soon (for signal implementation) ****\n");
-
+    fprintf(OutputFile, "%s %f\n", ( (sig_received==10)?("SIGUSR1"):("SIGUSR2") ) , sig_rec_time.tv_sec + (double)sig_rec_time.tv_usec/1000000 );
 
     // Close files
     fclose(InputFile);
@@ -146,7 +139,6 @@ int childFunction(int no)
 
 
 int parentFunction(int file_count) {
-    printf("parent function started\n");
 
     output_t outs[file_count];
 
@@ -173,6 +165,9 @@ int parentFunction(int file_count) {
         fscanf(OutputFile,"%f\n",&outs[i].exec_time);
 
         fscanf(OutputFile,"%d\n", &outs[i].m);
+
+        fscanf(OutputFile,"%s", outs[i].signal);
+        fscanf(OutputFile,"%s", outs[i].sig_rec); 
     }
     
     SelectionSortForOuts(outs, file_count);
@@ -200,12 +195,10 @@ int parentFunction(int file_count) {
         fprintf(FinalOutputFile, "%f - ", outs[i].exec_time);
         for(j=0; j<outs[i].m; j++)
             fprintf(FinalOutputFile, "%d ", outs[i].nums[j]);
-        fprintf(FinalOutputFile, " - ");
-        fprintf(FinalOutputFile, "SIG?? \n");
+        fprintf(FinalOutputFile, "- ");
+        fprintf(FinalOutputFile, "%s %s \n", outs[i].signal, outs[i].sig_rec);
     }
 
-
-    printf("parent function finished\n");
     return 0;
 }
 
