@@ -11,7 +11,7 @@ int parentFunction(int no);
 
 
 typedef struct {
-    int count;
+    int m;
     int nums[100];
     float exec_time;
     int sig;

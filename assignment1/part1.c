@@ -29,11 +29,13 @@ void main(int argc, char **argv)
 
     for(i=0; i<file_count; i++)
     {
-        if(i%2 == 0)
-            kill(pid[i], SIGUSR1);
-        else
-            kill(pid[i], SIGUSR2);
-        sleep(1);
+        if(  (waitpid(pid[i], &child_status, WNOHANG )) == 0 ) {
+            if(pid[i]%2 == 0)
+                kill(pid[i], SIGUSR2);
+            else
+                kill(pid[i], SIGUSR1);
+        }
+        //sleep(1);
     }
 
     for(i=0; i<file_count; i++)
@@ -62,7 +64,7 @@ int childFunction(int no)
     // Definitions
     char InputFileName[64], OutputFileName[64];
     int nums[100];
-    int n, i;
+    int m, i;
 
     // Get start time
     struct timeval  tv1, tv2;
@@ -87,19 +89,20 @@ int childFunction(int no)
     }
 
     // Read input file
-    fscanf(InputFile,"%d\n",&n);
+    fscanf(InputFile,"%d\n",&m);
 
-    for(i=0; i<n; i++)
+    for(i=0; i<m; i++)
         fscanf(InputFile,"%d ", &nums[i]);
 
     // Sort numbers with appropriate sorting function
-    if( (n%2) == 1)
-        SelectionSort(nums, n);
+    printf("getpid:%d \n", getpid());
+    if( (getpid()%2) == 1)
+        SelectionSort(nums, m);
     else
-        InsertionSort(nums, n);
+        InsertionSort(nums, m);
 
 #if 0   
-    for(i=0; i<n; i++)
+    for(i=0; i<m; i++)
         printf("%d ", nums[i]);
     printf("\n");
 #endif
@@ -125,12 +128,12 @@ int childFunction(int no)
 #endif
 
     //  Writes the results to the intermediate output file
-    fprintf(OutputFile, "%d\n", n);
-    for(i=0; i<n; i++)
+    fprintf(OutputFile, "%d\n", m);
+    for(i=0; i<m; i++)
         fprintf(OutputFile, "%d ", nums[i]);
     fprintf(OutputFile, "\n");
     fprintf(OutputFile, "%f \n", time_spent);
-    fprintf(OutputFile, "sig: %d  receive time: %f\n", sig_received, sig_rec_time.tv_sec + (double)sig_rec_time.tv_usec/1000000 );
+    fprintf(OutputFile, "%s %f\n",  ( (sig_received==10)?("SIGUSR1"):("SIGUSR2") ) , sig_rec_time.tv_sec + (double)sig_rec_time.tv_usec/1000000 );
     //fprintf(OutputFile, "**** coming soon (for signal implementation) ****\n");
 
 
@@ -147,7 +150,7 @@ int parentFunction(int file_count) {
 
     output_t outs[file_count];
 
-    int i, j, n;
+    int i, j ;
     char InputFileName[64], OutputFileName[64], FinalOutputFileName[64];
     int nums[100];
     float exec_time;
@@ -162,12 +165,14 @@ int parentFunction(int file_count) {
             return 1;
         }
 
-        fscanf(OutputFile,"%d\n", &outs[i].count);
+        fscanf(OutputFile,"%d\n", &outs[i].m);
 
-        for(j=0; j<outs[i].count; j++)
+        for(j=0; j<outs[i].m; j++)
             fscanf(OutputFile,"%d ", &outs[i].nums[j]);
 
         fscanf(OutputFile,"%f\n",&outs[i].exec_time);
+
+        fscanf(OutputFile,"%d\n", &outs[i].m);
     }
     
     SelectionSortForOuts(outs, file_count);
@@ -175,8 +180,8 @@ int parentFunction(int file_count) {
 #if 0
     for(i=0; i<file_count; i++)
     {
-        printf("%d\n",outs[i].count);
-        for(j=0; j<outs[i].count; j++)
+        printf("%d\n",outs[i].m);
+        for(j=0; j<outs[i].m; j++)
             printf("%d ", outs[i].nums[j]);
         printf("\n");
         printf("%f\n\n\n",outs[i].exec_time);
@@ -193,7 +198,7 @@ int parentFunction(int file_count) {
     for(i=0; i<file_count; i++)
     {
         fprintf(FinalOutputFile, "%f - ", outs[i].exec_time);
-        for(j=0; j<outs[i].count; j++)
+        for(j=0; j<outs[i].m; j++)
             fprintf(FinalOutputFile, "%d ", outs[i].nums[j]);
         fprintf(FinalOutputFile, " - ");
         fprintf(FinalOutputFile, "SIG?? \n");
