@@ -7,7 +7,7 @@
 #include <sys/wait.h>
 #include <string.h>
 
-int childFunction(int n);
+int childFunction(int n, int rand17);
 int parentFunction(int no);
 
 

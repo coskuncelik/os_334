@@ -4,41 +4,44 @@
 
 void signal_handler(int sig);
 
-int sig_received = 999 ;
+int sig_received = 999;
 struct timeval  sig_rec_time;
 
 void main(int argc, char **argv)
 {
     
-    int file_count = atoi(argv[1]) ;
+    int n = atoi(argv[1]) ; // file count
+    srand(time(0));
+    int rand17;
 
-    pid_t pid[file_count] ;
+    pid_t pid[n] ;
     int i, child_status;
 
     signal(SIGUSR1, signal_handler);
     signal(SIGUSR2, signal_handler);
 
-    for(i=0; i<file_count; i++)
+    for(i=0; i<n; i++)
     {
+        rand17 = rand()%7 + 1;
         if( (pid[i] = fork()) == 0  )
         {
-            childFunction(i);
+            childFunction(i, rand17);
             exit(100+i);
         }
     }
 
-    for(i=0; i<file_count; i++)
+    for(i=0; i<n; i++)
     {
-        if(  (waitpid(pid[i], &child_status, WNOHANG )) == 0 ) {
+        if(  (waitpid(pid[i], &child_status, WNOHANG )) == 0 ) // active child
+        {
             if(pid[i]%2 == 0)
                 kill(pid[i], SIGUSR2);
             else
                 kill(pid[i], SIGUSR1);
         }
-        //sleep(1);
     }
 
-    for(i=0; i<file_count; i++)
+    for(i=0; i<n; i++)
     {  
         pid_t wpid = wait(&child_status) ;
         if(WIFEXITED(child_status))
@@ -46,7 +49,7 @@ void main(int argc, char **argv)
         else
             printf("Child %d terminated abnormally\n", wpid);
     }
-    parentFunction(file_count);
+    parentFunction(n);
     
 }
 
@@ -55,7 +58,7 @@ void signal_handler(int sig) {
     gettimeofday(&sig_rec_time, NULL);
 }
 
-int childFunction(int no)
+int childFunction(int no, int rand17)
 {
     // Definitions
     char InputFileName[64], OutputFileName[64];
@@ -65,6 +68,9 @@ int childFunction(int no)
     // Get start time
     struct timeval  tv1, tv2;
     gettimeofday(&tv1, NULL);
+    // srand(time(0));
+    // printf("%d %s\n", rand()%10, " rand print");
+    // printf("%ld %s\n\n\n", time(0), " time0");
 
     // Create file names
     sprintf(InputFileName,  "file/input%d.txt",  no);
@@ -103,20 +109,13 @@ int childFunction(int no)
 #endif
     
     // Random sleep between 1-7 seconds
-    int stime;
-
-    srand(time(0));
-    for(i=0;i<100;i++)   // TODO: do not use 100. find another way for creating random nums..
-    {
-        stime = (rand() % 7) + 1 ;
-        if(i==no)  
-            break;
-    }
-    sleep(stime);
+    sleep(rand17);
+    printf("%d%s\n", rand17, "  rand17 print");
 
     // Get end time & calculate execution time
     gettimeofday(&tv2, NULL);
     double time_spent = (double) (tv2.tv_usec - tv1.tv_usec) / 1000000 + (double) (tv2.tv_sec - tv1.tv_sec) ;
+    // printf("%d\n %ld\n", rand17, time(0));
 
 #if 0
     printf ("Total time = %f seconds\n", time_spent);
@@ -138,16 +137,16 @@ int childFunction(int no)
 }
 
 
-int parentFunction(int file_count) {
+int parentFunction(int n) {
 
-    output_t outs[file_count];
+    output_t outs[n];
 
     int i, j ;
     char InputFileName[64], OutputFileName[64], FinalOutputFileName[64];
     int nums[100];
     float exec_time;
 
-    for(i=0; i<file_count; i++)
+    for(i=0; i<n; i++)
     {
         sprintf(OutputFileName, "file/output%d.txt", i);
             
@@ -170,10 +169,10 @@ int parentFunction(int file_count) {
         fscanf(OutputFile,"%s", outs[i].sig_rec); 
     }
     
-    SelectionSortForOuts(outs, file_count);
+    SelectionSortForOuts(outs, n);
 
 #if 0
-    for(i=0; i<file_count; i++)
+    for(i=0; i<n; i++)
     {
         printf("%d\n",outs[i].m);
         for(j=0; j<outs[i].m; j++)
@@ -190,7 +189,7 @@ int parentFunction(int file_count) {
         return 1;
     }
 
-    for(i=0; i<file_count; i++)
+    for(i=0; i<n; i++)
     {
         fprintf(FinalOutputFile, "%f - ", outs[i].exec_time);
         for(j=0; j<outs[i].m; j++)
