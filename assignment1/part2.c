@@ -71,7 +71,7 @@ int childFunction(int no, int rand17) {
     gettimeofday(&tv1, NULL);
 
     // Create file names
-    sprintf(InputFileName,  "file/input%d.txt",  no);
+    sprintf(InputFileName,  "files/input%d.txt",  no);
 
     // Open files
     FILE *InputFile = fopen(InputFileName, "r");
@@ -134,7 +134,7 @@ int parentFunction(int n) {
     
     SelectionSortForOuts(outs, n);
 
-    sprintf(FinalOutputFileName, "file/output.txt");
+    sprintf(FinalOutputFileName, "files/output.txt");
     FILE *FinalOutputFile = fopen(FinalOutputFileName, "w");
     if (FinalOutputFile == NULL){
         printf("Cannot open Final output file \n");
