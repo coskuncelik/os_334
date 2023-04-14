@@ -28,7 +28,7 @@ void main(int argc, char **argv){
     }
 
     for(i=0; i<n; i++){
-        // determine active child
+        // determine active child and send signal
         if(  (waitpid(pid[i], &child_status, WNOHANG )) == 0 ){
             if(pid[i]%2 == 0)
                 kill(pid[i], SIGUSR2);
@@ -54,6 +54,8 @@ void signal_handler(int sig) {
 }
 
 int childFunction(int no, int rand17) {
+
+    printf("Child %d started \n", getpid());
 
     // Declarations
     char InputFileName[64], OutputFileName[64];
@@ -100,11 +102,7 @@ int childFunction(int no, int rand17) {
     gettimeofday(&tv2, NULL);
     double time_spent = (double) (tv2.tv_usec - tv1.tv_usec) / 1000000 + (double) (tv2.tv_sec - tv1.tv_sec) ;
 
-#if 0
-    printf ("Total time = %f seconds\n", time_spent);
-#endif
-
-    //  Writes the results to the intermediate output file
+    //  Write the results to the intermediate output file
     fprintf(OutputFile, "%d\n", m);
     for(i=0; i<m; i++)
         fprintf(OutputFile, "%d ", nums[i]);
@@ -118,7 +116,6 @@ int childFunction(int no, int rand17) {
     
     return 0;
 }
-
 
 int parentFunction(int n) {
 
@@ -155,17 +152,6 @@ int parentFunction(int n) {
     
     SelectionSortForOuts(outs, n);
 
-#if 0
-    for(i=0; i<n; i++)
-    {
-        printf("%d\n",outs[i].m);
-        for(j=0; j<outs[i].m; j++)
-            printf("%d ", outs[i].nums[j]);
-        printf("\n");
-        printf("%f\n\n\n",outs[i].exec_time);
-    }
-#endif
-
     sprintf(FinalOutputFileName, "file/output.txt");
     FILE *FinalOutputFile = fopen(FinalOutputFileName, "w");
     if (FinalOutputFile == NULL) {
@@ -182,6 +168,5 @@ int parentFunction(int n) {
     }
 
     return 0;
+
 }
-
-
