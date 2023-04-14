@@ -4,6 +4,7 @@
 // Declarations
 void signal_handler(int sig);
 int sig_received = 999;
+char timeString[32];
 struct timeval sig_rec_time;
 int fds[100][2];
 
@@ -54,7 +55,14 @@ void main(int argc, char **argv){
 
 void signal_handler(int sig) {
     sig_received = sig;
+
+    // Signal receive time in Unix
     gettimeofday(&sig_rec_time, NULL);
+    
+    // Signal receive time in hh:mm:ss in UTC+3
+    time_t current_time = time(0);
+    struct tm *time_info = localtime(&current_time);
+    sprintf(timeString, "%02d:%02d:%02d", time_info->tm_hour+3, time_info->tm_min, time_info->tm_sec);
 }
 
 int childFunction(int no, int rand17) {
@@ -67,7 +75,7 @@ int childFunction(int no, int rand17) {
     int m, i;
 
     // Get start time
-    struct timeval  tv1, tv2;
+    struct timeval tv1, tv2;
     gettimeofday(&tv1, NULL);
 
     // Create file names
@@ -99,13 +107,13 @@ int childFunction(int no, int rand17) {
     gettimeofday(&tv2, NULL);
     double time_spent = (double) (tv2.tv_usec - tv1.tv_usec) / 1000000 + (double) (tv2.tv_sec - tv1.tv_sec) ;
 
-    //  Write the results to the intermediate output file
+    //  Generate intermediate struct
     output_t out;
     out.m = m;
     memcpy(out.nums, nums, m*sizeof(int));
     out.exec_time = time_spent;
     strcpy(out.signal,  ( (sig_received==10)?("SIGUSR1"):("SIGUSR2") ) );
-    sprintf(out.sig_rec, "%f", sig_rec_time.tv_sec + (double)sig_rec_time.tv_usec/1000000) ;
+    sprintf(out.sig_rec_time, "%f", sig_rec_time.tv_sec + (double)sig_rec_time.tv_usec/1000000) ;
 
     // Write to pipe
     write(fds[no][1], &out, sizeof(output_t));
@@ -148,7 +156,7 @@ int parentFunction(int n) {
         for(j=0; j<outs[i].m; j++)
             fprintf(FinalOutputFile, "%d ", outs[i].nums[j]);
         fprintf(FinalOutputFile, "- ");
-        fprintf(FinalOutputFile, "%s %s \n", outs[i].signal, outs[i].sig_rec);
+        fprintf(FinalOutputFile, "%s %s \n", outs[i].signal, outs[i].sig_rec_time);
     }
 
     return 0;
