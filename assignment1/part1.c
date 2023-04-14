@@ -50,6 +50,7 @@ void main(int argc, char **argv){
 
 void signal_handler(int sig) {
     sig_received = sig;
+    
     // Signal receive time in hh:mm:ss in UTC+3
     time_t current_time = time(0);
     struct tm *time_info = localtime(&current_time);

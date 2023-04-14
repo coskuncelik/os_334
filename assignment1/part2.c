@@ -113,7 +113,7 @@ int childFunction(int no, int rand17) {
     memcpy(out.nums, nums, m*sizeof(int));
     out.exec_time = time_spent;
     strcpy(out.signal,  ( (sig_received==10)?("SIGUSR1"):("SIGUSR2") ) );
-    sprintf(out.sig_rec_time, "%f", sig_rec_time.tv_sec + (double)sig_rec_time.tv_usec/1000000) ;
+    sprintf(out.sig_rec_time, "%s", timeString) ;
 
     // Write to pipe
     write(fds[no][1], &out, sizeof(output_t));
