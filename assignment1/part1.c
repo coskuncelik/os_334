@@ -4,7 +4,7 @@
 // Declarations
 void signal_handler(int sig);
 int sig_received = 999;
-struct timeval sig_rec_time;
+char timeString[32];
 
 void main(int argc, char **argv){
 
@@ -50,7 +50,9 @@ void main(int argc, char **argv){
 
 void signal_handler(int sig) {
     sig_received = sig;
-    gettimeofday(&sig_rec_time, NULL);
+    time_t current_time = time(0);
+    struct tm *time_info = localtime(&current_time);
+    sprintf(timeString, "%02d:%02d:%02d", time_info->tm_hour+3, time_info->tm_min, time_info->tm_sec);
 }
 
 int childFunction(int no, int rand17) {
@@ -108,7 +110,7 @@ int childFunction(int no, int rand17) {
         fprintf(OutputFile, "%d ", nums[i]);
     fprintf(OutputFile, "\n");
     fprintf(OutputFile, "%f \n", time_spent);
-    fprintf(OutputFile, "%s %f\n", ( (sig_received==10)?("SIGUSR1"):("SIGUSR2") ) , sig_rec_time.tv_sec + (double)sig_rec_time.tv_usec/1000000 );
+    fprintf(OutputFile, "%s %s\n", ( (sig_received==10)?("SIGUSR1"):("SIGUSR2") ) , timeString );
 
     // Close files
     fclose(InputFile);
@@ -126,6 +128,7 @@ int parentFunction(int n) {
     int nums[100];
     float exec_time;
 
+    // Read the intermediate files
     for(i=0; i<n; i++){
 
         sprintf(OutputFileName, "files/output%d.txt", i);
@@ -137,19 +140,16 @@ int parentFunction(int n) {
         }
 
         fscanf(OutputFile,"%d\n", &outs[i].m);
-
         for(j=0; j<outs[i].m; j++)
             fscanf(OutputFile,"%d ", &outs[i].nums[j]);
-
         fscanf(OutputFile,"%f\n",&outs[i].exec_time);
-
         fscanf(OutputFile,"%d\n", &outs[i].m);
-
         fscanf(OutputFile,"%s", outs[i].signal);
-        fscanf(OutputFile,"%s", outs[i].sig_rec);
+        fscanf(OutputFile,"%s", outs[i].sig_rec_time);
 
     }
     
+    // Sort wrt exec. times
     SelectionSortForOuts(outs, n);
 
     sprintf(FinalOutputFileName, "files/output.txt");
@@ -164,9 +164,9 @@ int parentFunction(int n) {
         for(j=0; j<outs[i].m; j++)
             fprintf(FinalOutputFile, "%d ", outs[i].nums[j]);
         fprintf(FinalOutputFile, "- ");
-        fprintf(FinalOutputFile, "%s %s \n", outs[i].signal, outs[i].sig_rec);
+        fprintf(FinalOutputFile, "%s %s \n", outs[i].signal, outs[i].sig_rec_time);
     }
-
+    
     return 0;
 
 }

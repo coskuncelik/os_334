@@ -1,4 +1,3 @@
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -10,14 +9,11 @@
 int childFunction(int n, int rand17);
 int parentFunction(int no);
 
-
 typedef struct {
     int m;
     int nums[100];
     float exec_time;
     int sig;
     char signal[64];
-    char sig_rec[64];
+    char sig_rec_time[64];
 } output_t ;
-
-

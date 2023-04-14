@@ -127,11 +127,13 @@ int parentFunction(int n) {
     int nums[100];
     float exec_time;
 
+    // Read the pipes
     for(i=0; i<n; i++){
         read(fds[i][0], &outs[i], sizeof(output_t));
         close(fds[i][1]);
     }
     
+    // Sort wrt exec. times
     SelectionSortForOuts(outs, n);
 
     sprintf(FinalOutputFileName, "files/output.txt");
