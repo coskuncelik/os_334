@@ -50,6 +50,7 @@ void main(int argc, char **argv){
 
 void signal_handler(int sig) {
     sig_received = sig;
+    // Signal receive time in hh:mm:ss in UTC+3
     time_t current_time = time(0);
     struct tm *time_info = localtime(&current_time);
     sprintf(timeString, "%02d:%02d:%02d", time_info->tm_hour+3, time_info->tm_min, time_info->tm_sec);
@@ -104,7 +105,7 @@ int childFunction(int no, int rand17) {
     gettimeofday(&tv2, NULL);
     double time_spent = (double) (tv2.tv_usec - tv1.tv_usec) / 1000000 + (double) (tv2.tv_sec - tv1.tv_sec) ;
 
-    //  Write the results to the intermediate output file
+    // Write the results to the intermediate output file
     fprintf(OutputFile, "%d\n", m);
     for(i=0; i<m; i++)
         fprintf(OutputFile, "%d ", nums[i]);
