@@ -5,6 +5,7 @@
 #include <sys/time.h>
 #include <sys/wait.h>
 #include <string.h>
+#include <signal.h>
 
 int childFunction(int n, int rand17);
 int parentFunction(int no);

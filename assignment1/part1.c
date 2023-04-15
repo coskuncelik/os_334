@@ -17,9 +17,14 @@ void main(int argc, char **argv){
     srand(time(0));
 
     // Set user defined signals
-    signal(SIGUSR1, signal_handler);
-    signal(SIGUSR2, signal_handler);
+    struct sigaction sa;
+	sa.sa_handler = signal_handler;
+	sa.sa_flags = SA_RESTART;
+	sigemptyset(&sa.sa_mask);
+	sigaction(SIGUSR1, &sa, NULL);
+    sigaction(SIGUSR2, &sa, NULL);
 
+    // Children's duties
     for(i=0; i<n; i++){
         if( (pid[i] = fork()) == 0  ){
             childFunction(i, rand()%7+1);
@@ -27,8 +32,8 @@ void main(int argc, char **argv){
         }
     }
 
-    for(i=0; i<n; i++){
-        // determine active child and send signal
+    // Determine active children and send signals
+    for(i=0; i<n; i++){    
         if(  (waitpid(pid[i], &child_status, WNOHANG )) == 0 ){
             if(pid[i]%2 == 0)
                 kill(pid[i], SIGUSR2);
@@ -37,6 +42,7 @@ void main(int argc, char **argv){
         }
     }
 
+    //  Determine terminated children
     for(i=0; i<n; i++){  
         pid_t wpid = wait(&child_status) ;
         if(WIFEXITED(child_status))
@@ -44,6 +50,8 @@ void main(int argc, char **argv){
         else
             printf("Child %d terminated abnormally\n", wpid);
     }
+
+    // Parent's duties
     parentFunction(n);
     
 }
