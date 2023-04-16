@@ -60,9 +60,16 @@ void signal_handler(int sig) {
     sig_received = sig;
     
     // Signal receive time in hh:mm:ss in UTC+3
-    time_t current_time = time(0);
-    struct tm *time_info = localtime(&current_time);
-    sprintf(timeString, "%02d:%02d:%02d", time_info->tm_hour+3, time_info->tm_min, time_info->tm_sec);
+//     time_t current_time = time(0);
+//     struct tm *time_info = localtime(&current_time);
+//     sprintf(timeString, "%02d:%02d:%02d", time_info->tm_hour+3, time_info->tm_min, time_info->tm_sec);
+		
+    struct timeval tv;
+    struct timezone tz;
+    struct tm *today;
+    gettimeofday(&tv,&tz);
+    today = localtime(&tv.tv_sec);
+    sprintf(timeString, "%02d:%02d:%02d.%d", today->tm_hour+3, today->tm_min, today->tm_sec, tv.tv_usec);
 }
 
 int childFunction(int no, int rand17) {
