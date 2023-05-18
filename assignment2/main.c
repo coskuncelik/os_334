@@ -8,27 +8,28 @@ int m;
 int matr[100][100];
 int d;
 int s;
-int offset;
+
 
 void* doShift(void* p)
 {
-	offset = *(int*)p ; //*((int*)p);
-    printf("offset = %d   ", offset);
+    int thread_no;
+	thread_no = *(int*)p ; //*((int*)p);
+    printf("thread_no = %d   ", thread_no);
     int i;
 
     int elements;
     elements = m/d;
-    if(offset==(d-1))
+    if(thread_no==(d-1))
         elements += (m%d);
 
-//    int start = offset * VECLEN;
-//    int end   = offset * VECLEN + VECLEN;
+    int start = thread_no * (m/d);
+    int end   = thread_no * (m/d) + elements-1;
 
 	pthread_mutex_lock(&myMutex);
 	count++;
 	pthread_mutex_unlock(&myMutex);
 
-    printf("offset = %d , count=%d, no_of_elements=%d \n", offset, count, elements);
+    printf("thread_no = %d , count=%d, no_of_elements=%d : %d -> %d\n", thread_no, count, elements, start, end);
 
     pthread_exit(NULL);
 }
@@ -36,7 +37,7 @@ void* doShift(void* p)
 int main(int argc, char* argv[])
 {
     int i,j;
-   d=4;// printf("thread sayisi: "); scanf("%d", &d);
+   d=5;// printf("thread sayisi: "); scanf("%d", &d);
    s=2;// printf("step sayisi  : "); scanf("%d", &s);
 
     // Open file
@@ -61,9 +62,12 @@ int main(int argc, char* argv[])
 
 	pthread_mutex_init(&myMutex, NULL);
 
+    int a[d];
+    for (i = 0; i < d; i++)
+        a[i] = i ;
 
 	for (i = 0; i < d; i++)
-		pthread_create(&threads[i], NULL, doShift, &i);
+		pthread_create(&threads[i], NULL, doShift, &a[i]);
 
 	for (i = 0; i < d; i++)
 		pthread_join(threads[i], NULL);
